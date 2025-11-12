@@ -1,5 +1,3 @@
-# translator.py (VERDADERAMENTE CORREGIDO)
-
 from clases import VarNode, BinOpNode, AssignmentNode
 from analisis import tokenize
 from parser import Parser
@@ -14,9 +12,8 @@ class CodeGenerator:
         self.registers = ['A', 'B']
         self.reg_pool = self.registers.copy()
         
-        # Dirección de memoria temporal (Spill)
-        self.temp_mem_addr = 6 # Empezamos a guardar temps en DM[6]
-        self.temp_vars_created = [] # Rastreador para el bloque DATA
+        self.temp_mem_addr = 6 
+        self.temp_vars_created = [] #
 
     def alloc_register(self):
         """Asigna un registro (A o B)."""
@@ -45,7 +42,7 @@ class CodeGenerator:
         
         target_var = root_node.variable.name
         self.variables_used.add(target_var)
-        self.add_line(f"STORE {final_reg}, {target_var}") # Ej. STORE A, result
+        self.add_line(f"STORE {final_reg}, {target_var}")
         
         self.free_register(final_reg)
         
@@ -62,40 +59,30 @@ class CodeGenerator:
         if isinstance(node, VarNode):
             reg = self.alloc_register() # Obtiene 'A'
             self.variables_used.add(node.name)
-            self.add_line(f"LOAD {reg}, {node.name}") # Ej: LOAD A, a
+            self.add_line(f"LOAD {reg}, {node.name}")
             return reg 
 
         if isinstance(node, BinOpNode):
             
-            # 1. Resuelve el lado izquierdo
-            left_reg = self._generate_expression(node.left) # 'left_reg' es 'A'
-
-            # 2. Resuelve el lado derecho
-            
-            # 2a. Derramar (Spill) left_reg (A) a memoria temporal
-            
-            # --- LÓGICA CORREGIDA ---
+            left_reg = self._generate_expression(node.left)
+        
             # Genera una etiqueta de variable única para esta dirección temporal
             temp_addr = self.temp_mem_addr
             self.temp_mem_addr += 1 # Prepara el siguiente slot
-            temp_var_label = f"temp{temp_addr}" # Ej: "temp6"
+            temp_var_label = f"temp{temp_addr}" 
             self.temp_vars_created.append(temp_var_label) # Guarda para el bloque DATA
             
             self.add_line(f"STORE {left_reg}, {temp_var_label}") # Guarda A en DM[6] (temp6)
-            self.free_register(left_reg) # Libera 'A'
-            # --- FIN DE LA LÓGICA CORREGIDA ---
+            self.free_register(left_reg) 
 
-            # 2b. Ahora que 'A' está libre, calcula el lado derecho
-            right_reg = self._generate_expression(node.right) # 'right_reg' es 'A'
+            right_reg = self._generate_expression(node.right) 
             
-            # 2c. Recuperar (Unspill) el resultado izquierdo
-            self.add_line(f"MOV B, {right_reg}") # Mueve el resultado de la derecha (A) a B
-            self.free_register(right_reg) # Libera 'A'
+            self.add_line(f"MOV B, {right_reg}")
+            self.free_register(right_reg) 
             
-            left_reg = self.alloc_register() # Obtiene 'A' de nuevo
-            self.add_line(f"LOAD {left_reg}, {temp_var_label}") # Carga el resultado izquierdo (A = DM[6])
+            left_reg = self.alloc_register() 
+            self.add_line(f"LOAD {left_reg}, {temp_var_label}")
             
-            # 3. Realiza la operación
             op_map = {'+': 'ADD', '-': 'SUB'}
             if node.op in op_map:
                 self.add_line(f"{op_map[node.op]} {left_reg}, B")
@@ -103,14 +90,14 @@ class CodeGenerator:
                 raise ValueError(f"Operador no soportado: {node.op}")
 
             self.free_register('B')
-            return left_reg # El resultado final está en 'A'
+            return left_reg 
 
     def _build_data_block(self):
         lines = ["DATA:"]
         self.variables_used.add('result')
         self.variables_used.add('error') 
 
-        # Añade variables de usuario
+        # Añade variables usadas
         for var in sorted(list(self.variables_used)):
             if var == 'result' or var == 'error':
                 lines.append(f"{var} 0") 
@@ -123,7 +110,7 @@ class CodeGenerator:
         
         return "\n".join(lines)
 
-# Bloque de Prueba (SIN CAMBIOS)
+# Bloque de Prueba
 if __name__ == '__main__':
     test_expression = "result a + b - (c + d)"
     print(f"--- Generador de Código para: '{test_expression}' ---")
