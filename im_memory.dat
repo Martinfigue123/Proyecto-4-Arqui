@@ -1,0 +1,21 @@
+// Programa Compilado V3 para: result a + b - (c + d)
+// (a=1, b=1, c=1, d=1) -> result = (1+1) - (1+1) = 0
+// Direcciones: a=0, b=1, c=2, d=3, result=4, temp6=6, temp7=7, temp8=8
+
+010010100000000 // 1. LOAD A, a      (A = DM[0])
+010011100000110 // 2. STORE A, temp6 (DM[6] = A)
+010010100000001 // 3. LOAD A, b      (A = DM[1])
+000000100000000 // 4. MOV B, A       (B = A)
+010010100000110 // 5. LOAD A, temp6  (A = DM[6])
+000010000000000 // 6. ADD A, B       (A = A + B -> (a+b))
+010011100000111 // 7. STORE A, temp7 (DM[7] = A)
+010010100000010 // 8. LOAD A, c      (A = DM[2])
+010011100001000 // 9. STORE A, temp8 (DM[8] = A)
+010010100000011 // 10. LOAD A, d     (A = DM[3])
+000000100000000 // 11. MOV B, A      (B = A)
+010010100001000 // 12. LOAD A, temp8 (A = DM[8])
+000010000000000 // 13. ADD A, B      (A = A + B -> (c+d))
+000000100000000 // 14. MOV B, A      (B = A)
+010010100000111 // 15. LOAD A, temp7 (A = DM[7])
+000100000000000 // 16. SUB A, B      (A = A - B -> (a+b)-(c+d))
+010011100000100 // 17. STORE A, result (DM[4] = A)
